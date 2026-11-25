@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b6ffdc"/>
+      <stop offset="0.5" stop-color="#2ee58e"/>
+      <stop offset="1" stop-color="#0c7a47"/>
+    </linearGradient>
+  </defs>
+  <!-- The same leaf mark as the title screen: two rounded corners -->
+  <path d="M4 28 C4 14 14 4 28 4 C28 18 18 28 4 28 Z" fill="url(#leaf)"/>
+  <path d="M7 25 L22 10" stroke="#0a5c36" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

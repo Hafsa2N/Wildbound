@@ -1,0 +1,280 @@
+/* ---------------- IN-GAME HUD ----------------
+   Hearts, coins and relics (top-left), distance, zone and chain (top-centre),
+   time and saved coins (top-right), plus popups and the results card. */
+
+.hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;          /* clicks go through to the game */
+    color: var(--ui-text);
+    font-family: var(--ui-font);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    user-select: none;
+    transition: opacity 0.5s;
+}
+
+/* Hidden while the title screen is up */
+.hud-off { opacity: 0; }
+
+.hud-corner {
+    position: absolute;
+    top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hud-left  { left: 16px; }
+.hud-right { right: 16px; align-items: flex-end; }
+
+/* ---- Hearts ---- */
+
+.hud-hearts { display: flex; gap: 4px; }
+
+.hud-heart svg {
+    width: 30px;
+    height: 30px;
+    fill: var(--ui-heart);
+    stroke: rgba(0, 0, 0, 0.35);
+    stroke-width: 1.2;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+    transition: fill 0.2s;
+}
+
+.hud-heart-empty svg { fill: rgba(255, 255, 255, 0.18); }
+
+.hud-heart-break { animation: hud-heart-break 0.45s ease-out; display: inline-block; }
+
+@keyframes hud-heart-break {
+    20% { transform: scale(1.35) rotate(-10deg); }
+    50% { transform: scale(0.85) rotate(8deg); }
+}
+
+/* ---- Counters ---- */
+
+.hud-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px 6px 8px;
+    background: var(--ui-panel);
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    font-size: 19px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;   /* digits don't jiggle */
+    backdrop-filter: blur(4px);
+}
+
+.hud-pill-relic { font-size: 17px; }
+
+.hud-bump { animation: hud-bump 0.22s ease-out; }
+
+@keyframes hud-bump {
+    40% { transform: scale(1.12); }
+}
+
+.hud-time {
+    font-size: 26px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.hud-wallet {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--ui-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Centre: distance, zone, chain ---- */
+
+.hud-center {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.hud-distance {
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.hud-distance small,
+.hud-banner-distance small {
+    font-size: 0.5em;
+    margin-left: 3px;
+    color: var(--ui-muted);
+}
+
+.hud-zone {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ui-emerald);
+}
+
+.hud-chain {
+    margin-top: 4px;
+    padding: 3px 12px;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: #1a1200;
+    background: linear-gradient(90deg, #ffe680, var(--ui-gold));
+    border-radius: 999px;
+    box-shadow: 0 0 16px rgba(255, 197, 49, 0.6);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.25s, transform 0.25s;
+    text-shadow: none;
+}
+
+.hud-chain-on { opacity: 1; transform: scale(1); }
+
+/* "RIVER CROSSING" sweeping across when a new zone begins */
+.hud-zone-banner {
+    position: absolute;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(28px, 5vw, 54px);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: #f2fff8;
+    opacity: 0;
+    text-shadow: 0 3px 14px rgba(0, 0, 0, 0.55), 0 0 30px rgba(46, 229, 142, 0.45);
+}
+
+.hud-zone-banner-show { animation: hud-zone 3.2s ease-out forwards; }
+
+@keyframes hud-zone {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(12px); letter-spacing: 0.3em; }
+    15%  { opacity: 1; transform: translateX(-50%) translateY(0); letter-spacing: 0.14em; }
+    75%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+}
+
+/* ---- Controls hint ---- */
+
+.hud-hint {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    background: var(--ui-panel);
+    border: 1px solid var(--ui-border);
+    border-radius: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: opacity 1s;
+}
+
+.hud-faded { opacity: 0; }
+
+/* ---- Floating popups ("+1", "BOUNCE!", "CHAIN x3") ---- */
+
+.hud-pop {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-weight: 800;
+    font-size: 18px;
+    white-space: nowrap;
+    animation: hud-pop 0.9s ease-out forwards;
+}
+
+/* One per popup type: hud-pop-${type} in Hud.popText() */
+.hud-pop-coin      { color: var(--ui-gold); }
+.hud-pop-chaincoin { color: #ffe680; font-size: 22px; }
+.hud-pop-relic     { color: var(--ui-emerald); font-size: 26px; letter-spacing: 0.06em; animation-duration: 1.6s; }
+.hud-pop-tool      { color: #b6ffdc; font-size: 24px; letter-spacing: 0.08em; }
+.hud-pop-chain     { color: #ffe680; font-size: 28px; letter-spacing: 0.06em; animation-duration: 1.6s; }
+
+@keyframes hud-pop {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    15%  { opacity: 1; transform: translate(-50%, -80%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%, -260%) scale(1); }
+}
+
+/* ---- Hit flash: a red vignette when you take damage ---- */
+
+.hud-hurt-flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(255, 40, 40, 0.45));
+    animation: hud-hurt 0.5s ease-out forwards;
+}
+
+@keyframes hud-hurt { to { opacity: 0; } }
+
+/* ---- Results card ---- */
+
+.hud-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 300px;
+    padding: 24px 32px;
+    background: rgba(6, 26, 17, 0.85);
+    border: 1px solid var(--ui-border);
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    transition: opacity 0.4s, transform 0.4s;
+}
+
+.hud-banner h2 {
+    margin-bottom: 14px;
+    font-size: 28px;
+    color: var(--ui-emerald);
+}
+
+.hud-banner-lost h2 { color: var(--ui-heart); }
+
+.hud-banner-distance {
+    font-size: 46px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+.hud-banner dl {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 6px 24px;
+    margin-bottom: 18px;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+}
+
+.hud-banner dt { text-align: left;  color: var(--ui-muted); }
+.hud-banner dd { text-align: right; font-weight: 700; }
+.hud-banner p  { color: var(--ui-muted); }
+
+.hud-hidden {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+}
+
+/* ---- Small screens ---- */
+
+@media (max-width: 640px) {
+    .hud-center { top: 64px; }
+    .hud-hint { font-size: 12px; white-space: normal; text-align: center; width: calc(100% - 32px); }
+}
