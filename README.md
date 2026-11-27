@@ -167,5 +167,4 @@ Created by **[Hafsa2N](https://github.com/Hafsa2N)**.
 Built with [three.js](https://threejs.org/) and [Vite](https://vitejs.dev/).
 
 ## License
-
 No license has been chosen yet, so all rights are reserved by default.
