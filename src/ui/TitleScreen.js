@@ -26,6 +26,11 @@ export default class TitleScreen {
                     </div>
                 </div>
 
+                <div class="title-board" data-ref="board" hidden>
+                    <h3>Top runs</h3>
+                    <ol data-ref="boardList"></ol>
+                </div>
+
                 <button class="title-start" data-ref="start" type="button">
                     Press <b>Space</b> to begin
                 </button>
@@ -66,6 +71,34 @@ export default class TitleScreen {
         this.ref.relics.textContent = best?.relics
             ? `Most relics: ${best.relics}`
             : '';
+    }
+
+    // rows: [{ name, distance }], or the string 'loading' / 'offline'.
+    // Built with textContent (never innerHTML) so a name can't inject HTML.
+    showBoard(rows) {
+        this.ref.board.hidden = false;
+        const list = this.ref.boardList;
+        list.replaceChildren();
+
+        if (rows === 'loading' || rows === 'offline' || rows.length === 0) {
+            const note = document.createElement('li');
+            note.className = 'title-board-note';
+            note.textContent = rows === 'loading' ? 'Loading…'
+                : rows === 'offline' ? 'Leaderboard offline'
+                : 'No runs yet - be the first!';
+            list.append(note);
+            return;
+        }
+
+        for (const row of rows) {
+            const item = document.createElement('li');
+            const name = document.createElement('span');
+            const distance = document.createElement('span');
+            name.textContent = row.name;
+            distance.textContent = `${Number(row.distance).toLocaleString()} m`;
+            item.append(name, distance);
+            list.append(item);
+        }
     }
 
     show() {

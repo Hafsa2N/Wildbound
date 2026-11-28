@@ -17,6 +17,10 @@ import { updateWater, waterMaterials } from './world/Water.js';
 import { START_Z } from './config.js';
 import Hud from './ui/Hud.js';
 import TitleScreen from './ui/TitleScreen.js';
+import {
+    leaderboardEnabled, NAME_PATTERN,
+    fetchTopScores, submitScore, wakeServer, loadName, saveName
+} from './services/leaderboard.js';
 import { damp } from './utils/math.js';
 
 // ---------------- THE GAME ----------------
@@ -36,6 +40,10 @@ const _centre = new THREE.Vector3();
 const _right = new THREE.Vector3();
 const _popAt = new THREE.Vector3();
 const BEST_KEY = 'wildbound.best.endless';
+
+// True while the player is typing into a text box (e.g. their name).
+const isTyping = (event) =>
+    event.target instanceof HTMLElement && event.target.closest('input, textarea') !== null;
 
 export default class Game {
     constructor(container) {
@@ -81,8 +89,12 @@ export default class Game {
             tagline: 'Swing, leap and slide through a jungle that fights back.',
             onStart: () => this.startGame()
         });
+        this.hud.onSubmitScore = (name) => this.submitRun(name);
         this.createDebugHud();
         this.showTitle();
+
+        // Wake the leaderboard server now, while you read the title screen.
+        wakeServer();
         this.precompileShaders();
 
         // The game has MODES. Each key means something different in each.
@@ -93,6 +105,9 @@ export default class Game {
         //   any time while playing  - Esc goes back to the title
         // (R also restarts - handy, but not something you need to learn.)
         window.addEventListener('keydown', (e) => {
+            // Typing your name? Then keys are letters, not game controls.
+            if (isTyping(e)) return;
+
             if (this.mode === 'title') {
                 if (e.code === 'Space' || e.code === 'Enter') {
                     e.preventDefault();
@@ -292,6 +307,7 @@ export default class Game {
         this.player.facing = 0; // turn around to face the camera
         this.hud.setVisible(false);
         this.title.refresh(this.best, this.wallet);
+        this.refreshLeaderboard();
         this.title.show();
     }
 
@@ -356,6 +372,48 @@ export default class Game {
         }
     }
 
+    // ---------------- LEADERBOARD ----------------
+
+    refreshLeaderboard() {
+        if (!leaderboardEnabled) return;
+
+        this.title.showBoard('loading');
+        fetchTopScores(5)
+            .then((rows) => this.title.showBoard(rows))
+            .catch(() => this.title.showBoard('offline'));
+    }
+
+    async submitRun(name) {
+        if (!NAME_PATTERN.test(name)) {
+            this.hud.setSubmitStatus('Name: 3-12 letters, numbers or _', 'error');
+            return;
+        }
+
+        const run = this.run;
+        this.hud.setSubmitStatus('Saving…', 'busy');
+        // A sleeping free server can take a while: say so, so it doesn't look stuck.
+        const slow = setTimeout(
+            () => this.hud.setSubmitStatus('Waking the server… (up to a minute)', 'busy'),
+            4000
+        );
+
+        try {
+            const { rank } = await submitScore({
+                name,
+                distance: Math.floor(run.distance),
+                relics: run.relics,
+                time: Math.round(run.time * 10) / 10
+            });
+            saveName(name);
+            this.hud.setSubmitStatus(`Saved! This run places #${rank} on the leaderboard.`, 'done');
+            this.refreshLeaderboard();
+        } catch (error) {
+            this.hud.setSubmitStatus(error.message, 'error');
+        } finally {
+            clearTimeout(slow);
+        }
+    }
+
     endRun() {
         this.run.over = true;
         this.run.overAt = this.time;
@@ -369,6 +427,9 @@ export default class Game {
             this.player.falls,
             this.wallet
         );
+
+        // Offer to submit any real run (not a 0 m stumble at the start).
+        this.hud.showSubmit(leaderboardEnabled && this.run.distance >= 1, loadName());
     }
 
     // ---------------- PICKUPS ----------------

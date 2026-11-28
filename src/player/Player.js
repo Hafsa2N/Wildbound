@@ -123,6 +123,9 @@ export default class Player {
         this.pressed = new Set();  // keys pressed since the last update()
 
         window.addEventListener('keydown', (e) => {
+            // Typing your name on the results card isn't playing.
+            if (e.target instanceof HTMLElement && e.target.closest('input, textarea')) return;
+
             // Arrow keys and Space would otherwise scroll the page.
             if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
                 e.preventDefault(); // stop the page scrolling

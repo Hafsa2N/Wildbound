@@ -64,6 +64,17 @@ export default class Hud {
                 <h2 data-value="bannerTitle"></h2>
                 <div class="hud-banner-distance" data-value="bannerDistance"></div>
                 <dl data-value="bannerStats"></dl>
+
+                <form class="hud-submit" data-value="submitForm" hidden>
+                    <div class="hud-submit-row">
+                        <input data-value="nameInput" type="text" maxlength="12"
+                               autocomplete="off" spellcheck="false"
+                               placeholder="Your name" aria-label="Your name for the leaderboard">
+                        <button type="submit" data-value="submitButton">Submit score</button>
+                    </div>
+                    <p class="hud-submit-status" data-value="submitStatus" role="status"></p>
+                </form>
+
                 <p><b>Space</b> run again &nbsp;·&nbsp; <b>Esc</b> title screen</p>
             </div>
         `;
@@ -77,6 +88,13 @@ export default class Hud {
         });
 
         this.heartEls = [...this.el.hearts.children];
+
+        // The results card's leaderboard form. The Game sets onSubmitScore.
+        this.onSubmitScore = null;
+        this.el.submitForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            this.onSubmitScore?.(this.el.nameInput.value.trim());
+        });
     }
 
     // Write a value into element `key` only if it changed. `format` turns
@@ -203,5 +221,25 @@ export default class Hud {
 
     hideResults() {
         this.el.banner.classList.add('hud-hidden');
+        this.el.nameInput.blur();
+    }
+
+    // ---- Leaderboard form ----
+
+    // Show (or hide) the "submit your score" form, pre-filled with a name.
+    showSubmit(visible, name = '') {
+        this.el.submitForm.hidden = !visible;
+        this.el.nameInput.value = name;
+        this.setSubmitStatus('');
+    }
+
+    // state: '' | 'busy' | 'done' | 'error'
+    setSubmitStatus(text, state = '') {
+        this.el.submitStatus.textContent = text;
+        this.el.submitStatus.dataset.state = state;
+
+        const locked = state === 'busy' || state === 'done';
+        this.el.nameInput.disabled = locked;
+        this.el.submitButton.disabled = locked;
     }
 }

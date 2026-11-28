@@ -278,3 +278,56 @@
     .hud-center { top: 64px; }
     .hud-hint { font-size: 12px; white-space: normal; text-align: center; width: calc(100% - 32px); }
 }
+
+/* ---- Leaderboard form on the results card ---- */
+
+/* The HUD lets clicks pass through to the game - except the results
+   card, which now has a text box and a button. */
+.hud-banner { pointer-events: auto; }
+.hud-banner.hud-hidden { pointer-events: none; }
+
+.hud-submit { margin-bottom: 16px; }
+
+.hud-submit-row {
+    display: flex;
+    gap: 8px;
+}
+
+.hud-submit input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    font: 600 15px var(--ui-font);
+    color: var(--ui-text);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    outline: none;
+}
+
+.hud-submit input:focus { border-color: var(--ui-emerald); }
+.hud-submit input::placeholder { color: var(--ui-muted); }
+
+.hud-submit button {
+    padding: 9px 14px;
+    font: 800 14px var(--ui-font);
+    color: #06281a;
+    background: linear-gradient(180deg, #9dffd0, var(--ui-emerald));
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.hud-submit button:hover:not(:disabled) { filter: brightness(1.08); }
+.hud-submit button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.hud-submit :disabled { opacity: 0.55; cursor: default; }
+
+.hud-submit-status {
+    min-height: 1.4em;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ui-muted);
+}
+
+.hud-submit-status[data-state="done"]  { color: var(--ui-emerald); font-weight: 700; }
+.hud-submit-status[data-state="error"] { color: var(--ui-heart); }

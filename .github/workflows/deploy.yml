@@ -35,6 +35,10 @@ jobs:
 
       - name: Build Vite project
         run: npm run build
+        env:
+          # The leaderboard server's address, from Settings -> Secrets and
+          # variables -> Actions -> Variables. Empty = leaderboard off.
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
