@@ -31,6 +31,9 @@ const app = express();
 // req.ip the real visitor's address, so rate limiting works per player.
 app.set('trust proxy', 1);
 
+// Don't advertise which framework runs the server ("X-Powered-By: Express").
+app.disable('x-powered-by');
+
 // CORS: browsers only let pages from these sites call the API.
 app.use(cors({
     origin: ALLOWED_ORIGINS,

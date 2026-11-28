@@ -48,7 +48,10 @@ const isTyping = (event) =>
 export default class Game {
     constructor(container) {
         this.container = container;
-        this.clock = new THREE.Clock();
+        // Measures the time between frames. connect() lets it notice when
+        // the tab is hidden, so coming back doesn't count as one huge frame.
+        this.timer = new THREE.Timer();
+        this.timer.connect(document);
         this.time = 0; // our own running total; see animate()
 
         this.createScene();
@@ -158,7 +161,7 @@ export default class Game {
         this.renderer.setSize(window.innerWidth || 1280, window.innerHeight || 720);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.type = THREE.PCFShadowMap; // filtered (soft-edged) shadows
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.15;
@@ -649,12 +652,13 @@ export default class Game {
 
     // ---------------- LOOP ----------------
 
-    animate() {
-        requestAnimationFrame(() => this.animate());
+    animate(timestamp) {
+        requestAnimationFrame((t) => this.animate(t));
 
-        // dt = seconds since last frame, capped so a tab switch can't
+        // dt = seconds since last frame, capped so a slow frame can't
         // produce one giant step.
-        const dt = Math.min(this.clock.getDelta(), 0.05);
+        this.timer.update(timestamp);
+        const dt = Math.min(this.timer.getDelta(), 0.05);
 
         this.step(dt);
 

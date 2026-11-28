@@ -186,6 +186,31 @@
     .title-controls { display: none; }
 }
 
+/* ---- Short windows (laptops, browsers with big toolbars) ----
+   The panel is a tall stack, so on short screens: smaller logo and
+   spacing first, and if that's still not enough, drop the controls list
+   (the same controls show in-game, in the hint at the bottom). */
+
+@media (max-height: 900px) {
+    .title-panel { gap: 12px; }
+    .title-logo { font-size: clamp(40px, 6vw, 72px); }
+    .title-leaf { width: 26px; height: 26px; }
+    .title-tagline { font-size: 15px; margin-top: -4px; }
+    .title-world { padding: 10px 16px; }
+    .title-world-name { font-size: 20px; }
+    .title-start { padding: 11px 22px; font-size: 17px; }
+}
+
+@media (max-height: 760px) {
+    .title-controls { display: none; }
+}
+
+@media (max-height: 620px) {
+    .title-leaf,
+    .title-tagline,
+    .title-world-zones { display: none; }
+}
+
 /* ---- Top runs (from the leaderboard server) ---- */
 
 .title-board {
